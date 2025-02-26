@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Season Wise Rajab & Ramadaan (Next 30 Hijri Years)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 20px auto;
+      width: 90%;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    /* Season colors */
+    .winter { background-color: #add8e6; }  /* Light Blue */
+    .spring { background-color: #90ee90; }  /* Light Green */
+    .summer { background-color: #fffacd; }  /* Light Yellow */
+    .autumn { background-color: #ffcc99; }  /* Light Orange */
+  </style>
+</head>
+<body>
+  <h1>Season Wise Occurrence of Rajab & Ramadaan</h1>
+  <p>For the next 30 Hijri years (starting from 1446H)</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Hijri Year</th>
+        <th>Rajab Start<br>(Gregorian Date & Season)</th>
+        <th>Ramadaan Start<br>(Gregorian Date & Season)</th>
+      </tr>
+    </thead>
+    <tbody id="resultsTable"></tbody>
+  </table>
+
+  <!-- Load your conversion library -->
+  <script src="hijriDate.js"></script>
+  <script>
+    // Helper function: Determine season from a Gregorian date.
+    // Using meteorological seasons in the Northern Hemisphere:
+    // Winter: December (11), January (0), February (1)
+    // Spring: March (2), April (3), May (4)
+    // Summer: June (5), July (6), August (7)
+    // Autumn: September (8), October (9), November (10)
+    function getSeason(date) {
+      const m = date.getMonth();
+      if (m === 11 || m === 0 || m === 1) {
+        return { name: "Winter", className: "winter" };
+      } else if (m >= 2 && m <= 4) {
+        return { name: "Spring", className: "spring" };
+      } else if (m >= 5 && m <= 7) {
+        return { name: "Summer", className: "summer" };
+      } else {
+        return { name: "Autumn", className: "autumn" };
+      }
+    }
+
+    // Format Date object as YYYY-MM-DD
+    function formatDate(date) {
+      return date.toISOString().split('T')[0];
+    }
+
+    // Main function to generate the table
+    function generateSeasonList() {
+      // Set starting Hijri year; you can adjust as needed.
+      const startHijriYear = 1446;
+      const totalYears = 30;
+      const tableBody = document.getElementById("resultsTable");
+
+      // For each Hijri year, get the start of Rajab and Ramadaan.
+      // Note: In our hijriDate.js, Hijri months are zero-indexed:
+      // Rajab is index 6, Ramadaan is index 8.
+      for (let i = 0; i < totalYears; i++) {
+        const hijriYear = startHijriYear + i;
+
+        // Create HijriDate objects for Rajab 1 and Ramadaan 1.
+        let rajabHijri = new HijriDate(hijriYear, 6, 1);
+        let ramadaanHijri = new HijriDate(hijriYear, 8, 1);
+
+        // Convert to Gregorian.
+        // Rounding the Astronomical Julian Date to fix the 1-day error.
+        let rajabGregorian = HijriDate.ajdToGregorian(Math.round(rajabHijri.toAJD()));
+        let ramadaanGregorian = HijriDate.ajdToGregorian(Math.round(ramadaanHijri.toAJD()));
+
+        // Determine seasons for each Gregorian date.
+        let rajabSeason = getSeason(rajabGregorian);
+        let ramadaanSeason = getSeason(ramadaanGregorian);
+
+        // Build table row.
+        let tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${hijriYear}H</td>
+          <td>
+            ${formatDate(rajabGregorian)}<br>
+            <span class="${rajabSeason.className}">${rajabSeason.name}</span>
+          </td>
+          <td>
+            ${formatDate(ramadaanGregorian)}<br>
+            <span class="${ramadaanSeason.className}">${ramadaanSeason.name}</span>
+          </td>
+        `;
+        tableBody.appendChild(tr);
+      }
+    }
+
+    // Run the generator after page loads.
+    window.onload = generateSeasonList;
+  </script>
+</body>
+</html>
